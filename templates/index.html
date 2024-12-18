@@ -3,15 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" type="text/css" href="/static/styles.css">
+    <link rel="stylesheet" type="text/css" href="/static/styles.css" />
     <title>YouTube Downloader</title>
-
   </head>
   <body>
     <div class="container">
       <header>
         <h1>YouTube Downloader</h1>
-        <p>Paste your link in the space below...</p>
+        <p>
+          Paste your YouTube video link in the space below to start the
+          download.
+        </p>
       </header>
 
       <div class="status" id="status"></div>
@@ -33,62 +35,82 @@
     </div>
 
     <script>
-      // Handle the download button click
       document
-        .getElementById("downloadBtn")
-        .addEventListener("click", async function (e) {
-          e.preventDefault(); // Prevent default form submission
+        .getElementById("urlSubmit")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault(); // Prevent form submission
           const link = document.getElementById("link").value;
           const status = document.getElementById("status");
-
-          // Check if the input link is valid
-          if (link === "") {
+          const progressBar = document.getElementById("progressBar");
+    
+          // Clear previous status and progress
+          status.textContent = "";
+          progressBar.style.width = "0%";
+          progressBar.textContent = "0%";
+    
+          if (!link) {
             status.textContent = "Please enter a valid YouTube link.";
             status.style.color = "red";
             return;
           }
-
-          status.textContent = "Downloading...";
-          status.style.color = "#007bff";
-
-          // Send the POST request to the backend
+    
+          status.textContent = "Starting download...";
+          status.style.color = "#007bff"; // Blue color
+    
           try {
             const formData = new FormData();
-            formData.append("downloadlink", link); // Sending as form data
-
+            formData.append("downloadlink", link);
+    
             const response = await fetch("/download", {
               method: "POST",
               body: formData,
             });
-
-            if (response.ok) {
-              // Once the download starts, start the progress tracking
-              const eventSource = new EventSource("/download");
-
-              eventSource.onmessage = function (event) {
-                const progressData = JSON.parse(event.data);
-                const progressBar = document.getElementById("progressBar");
-
-                // Update the progress bar width based on the server progress
-                progressBar.style.width = `${progressData.progress}%`;
-
-                // If download is complete, show a success message
-                if (progressData.progress >= 100) {
-                  eventSource.close();
-                  document.getElementById("status").textContent =
-                    "Download Completed!";
-                  document.getElementById("status").style.color = "green";
-                }
-              };
-            } else {
-              status.textContent = "Failed to start download.";
-              status.style.color = "red";
+    
+            if (!response.ok) {
+              throw new Error("Failed to start the download.");
             }
+    
+            // Start listening for progress updates
+            const eventSource = new EventSource("/progress");
+    
+            eventSource.onmessage = function (event) {
+              const progressData = JSON.parse(event.data);
+              const progress = progressData.progress;
+    
+              if (progressData.status === "downloading" && progress >= 0 && progress <= 100) {
+                progressBar.style.width = `${progress}%`;
+                progressBar.textContent = `${progress}%`;
+              }
+    
+              if (progressData.status === "completed") {
+                status.textContent = "Download complete!";
+                status.style.color = "green";
+                progressBar.style.width = "100%";
+                progressBar.textContent = "100%";
+                eventSource.close();
+              }
+    
+              if (progressData.status === "error") {
+                status.textContent = progressData.message || "An error occurred during download.";
+                status.style.color = "red";
+                progressBar.style.width = "0%";
+                eventSource.close();
+              }
+            };
+    
+            eventSource.onerror = function () {
+              status.textContent = "An error occurred while tracking the download progress.";
+              status.style.color = "red";
+              progressBar.style.width = "0%";
+              eventSource.close();
+            };
           } catch (error) {
-            status.textContent = "An error occurred while downloading.";
+            status.textContent = "An error occurred while downloading. Please try again.";
             status.style.color = "red";
+            progressBar.style.width = "0%";
           }
         });
     </script>
+    
   </body>
 </html>

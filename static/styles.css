@@ -58,6 +58,10 @@ button:hover {
   height: 20px;
   background-color: #ddd;
   border-radius: 10px;
+  color: #ddd;
+  padding: 3px;
+  text-decoration: bold;
+  font-size:11px;
 }
 .progress-bar {
   height: 100%;
