@@ -1,0 +1,87 @@
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  margin: 0;
+  padding: 0;
+}
+.container {
+  width: 100%;
+  max-width: 500px;
+  margin: 50px auto;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+header {
+  text-align: center;
+  color: #007bff;
+}
+h1 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+.status {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  color: #007bff;
+}
+input[type="url"] {
+  width: 90%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 2px solid #007bff;
+  border-radius: 4px;
+  font-size: 16px;
+}
+button {
+  width: 90%;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+button:hover {
+  background-color: #0056b3;
+}
+.progress-container {
+  margin: 0 auto;
+  width: 90%;
+  height: 20px;
+  background-color: #ddd;
+  border-radius: 10px;
+}
+.progress-bar {
+  height: 100%;
+  width: 0;
+  background-color: #007bff;
+  border-radius: 10px;
+  transition: width 0.2s ease-in-out;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  h1 {
+    font-size: 20px;
+  }
+  .container {
+    padding: 15px;
+  }
+  input[type="url"] {
+    font-size: 14px;
+  }
+  button {
+    font-size: 14px;
+  }
+  .status {
+    font-size: 14px;
+  }
+}
