@@ -7,10 +7,10 @@ import urllib.parse
 import time
 import cgi
 import threading
-import queue  # For thread-safe progress sharing
+import queue 
 
 class CustomHTTPRequestHandler(BaseHTTPRequestHandler):
-    progress_queue = queue.Queue()  # Global queue to store progress updates
+    progress_queue = queue.Queue()
 
     def do_GET(self):
         if self.path == '/':
@@ -60,15 +60,14 @@ class CustomHTTPRequestHandler(BaseHTTPRequestHandler):
 
         while True:
             try:
-                # Wait for progress update from the queue
+               
                 progress_data = CustomHTTPRequestHandler.progress_queue.get(timeout=30)
                 if progress_data:
                     self.wfile.write(f"data: {json.dumps(progress_data)}\n\n".encode())
             except queue.Empty:
-                # If no new progress update is received, send a ping to keep the connection alive
                 self.wfile.write(b"data: {}\n\n")
 
-            time.sleep(1)  # Reduce CPU usage
+            time.sleep(1)
 
     def handle_download_request(self):
         """Handle video download request."""
@@ -88,8 +87,6 @@ class CustomHTTPRequestHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write(b"Download started. Check progress above.")
-
-            # Call the function to download the video with progress tracking
             threading.Thread(target=self.download_youtube_video_with_progress, args=(video_url,)).start()
         else:
             self.send_error(400, "Invalid video URL")
